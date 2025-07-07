@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+
 const authRoutes = require("./routes/auth-routes");
 const mediaRoutes = require("./routes/instructor-routes/media-routes");
 const InstructorCourseRoutes = require("./routes/instructor-routes/course-routes");
@@ -11,7 +12,6 @@ const StudentCoursesRoutes = require("./routes/student-routes/student-courses-ro
 const StudentCourseProgressRoutes = require("./routes/student-routes/course-progress-routes");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -50,6 +50,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app;
