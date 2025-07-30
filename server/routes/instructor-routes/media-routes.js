@@ -10,11 +10,12 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload', upload.single('file'), async (req, res)=>{
     try {
-        
-        const result = await uploadMediaToCloudinary(req.file.path);
+        const result = await uploadMediaToCloudinary(req.file.buffer);
         res.status(200).json({
             success: true,
-            data: result
+            data: {
+                url: result.url
+            }
         })
 
 

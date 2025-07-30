@@ -1,4 +1,5 @@
 const cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
 
 //configure 
 cloudinary.config({
@@ -11,17 +12,20 @@ if (!process.env.CLOUDINARY_API_KEY) {
   console.warn('Missing Cloudinary API key!');
 }
 
-const uploadMediaToCloudinary = async (filePath)=>{
-    try {
-        const result = await cloudinary.uploader.upload(filePath, {
-            resource_type: 'auto',
-        });
-        return result;
-    } catch (error) {
-        console.log(error);
-        throw new Error('Could not upload file to cloudinary');
-    }
+
+function uploadMediaToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    let stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
 }
+
 
 const deleteMediaFromCloudinary = async (publicId)=>{
     try {

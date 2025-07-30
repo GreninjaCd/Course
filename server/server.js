@@ -10,7 +10,11 @@ const StudentViewCourseRoutes = require("./routes/student-routes/course-routes")
 const StudentViewOrderRoutes = require("./routes/student-routes/order-routes");
 const StudentCoursesRoutes = require("./routes/student-routes/student-courses-routes");
 const StudentCourseProgressRoutes = require("./routes/student-routes/course-progress-routes");
+const timeout = require('connect-timeout');
 
+function haltOnTimeout(req, res, next) {
+  if (!req.timedout) next();
+}
 const app = express();
 
 const MONGO_URI = process.env.MONGO_URI;
@@ -33,7 +37,7 @@ mongoose
 
 //routes configuration
 app.use("/auth", authRoutes);
-app.use("/media", mediaRoutes);
+app.use("/media", timeout('7m'), haltOnTimeout, mediaRoutes);
 app.use("/instructor/course", InstructorCourseRoutes);
 app.use("/student/course", StudentViewCourseRoutes);
 app.use("/student/order", StudentViewOrderRoutes);
@@ -50,4 +54,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-module.exports = app;
+app.listen(3000, () => {
+  console.log("running in 3000");
+})
+
+// module.exports = app;
