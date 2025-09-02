@@ -9,6 +9,8 @@ import {
 import CourseDetailModal from './CourseDetailModal';
 import { mockCourses } from '../data/mockCourses';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/useAuth";
+import {checkAuth} from '../contexts/AuthContext'
 
 const tabs = ['All', 'Recommended', 'Popular', 'Newly Added'];
 const sortOptions = ['Rating', 'Price', 'Duration'];
@@ -22,6 +24,24 @@ const StudentDashboard = () => {
   const [sortBy, setSortBy] = useState('');
   const [enrolled, setEnrolled] = useState([]);
   const navigate = useNavigate();
+  const { user } = useAuth(); 
+  // useEffect(() => {
+  //   if (!user) {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       navigate("/login");
+  //     } else {
+  //       checkAuth(token).then(authCheck => {
+  //         if (!authCheck.success) {
+  //           navigate("/login");
+  //         } else {
+  //           const { setUser } = useAuth();
+  //           setUser(authCheck.data.user);
+  //         }
+  //       });
+  //     }
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("enrolledCourseIds")) || [];

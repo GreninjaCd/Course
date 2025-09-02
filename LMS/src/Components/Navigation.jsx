@@ -1,5 +1,5 @@
 // src/components/Navigation.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   User,
   ChevronDown,
@@ -9,11 +9,12 @@ import {
   LogOut,
   GraduationCap
 } from 'lucide-react';
-import { useAuth } from "../contexts/AuthContext";
+import {useAuth}  from "../contexts/useAuth";
 import { Link, useNavigate } from "react-router-dom";
+import { checkAuth, logout } from '../contexts/AuthContext';
 
 const Navigation = () => {
-  const { user, logout } = useAuth();
+  const { user, setUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -25,6 +26,24 @@ const Navigation = () => {
     }
   };
 
+   useEffect(() => {
+      if (!user) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+        } else {
+          checkAuth(token).then(authCheck => {
+            if (!authCheck.success) {
+              navigate("/login");
+            } else {
+              setUser(authCheck.data.user);
+            }
+          });
+        }
+      }
+    }, [user]);
+  
+    //useEffect(()=> {console.log("hi",user)}, [user])
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

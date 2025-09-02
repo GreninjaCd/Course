@@ -13,16 +13,23 @@ import Register from "./Components/Register";
 import Courses from "./Components/Courses";
 import Categories from "./Components/Categories";
 import MyCourses from "./Components/MyCourses";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/useAuth";
+import {checkAuth} from "./contexts/AuthContext";
 
-const ProtectedRoute = ({ children, role }) => {
-  const { user } = useAuth();
-
-  if (!user) return <Navigate to="/login" />;
-  if (role && user.role !== role) return <Navigate to="/" />;
-
-  return children;
-};
+// const ProtectedRoute = async ({ children, role }) => {
+//   const { user } = useAuth();
+//   console.log("ProtectedRoute user:", user);
+//   if (!user) {
+//     const token = localStorage.getItem("token");
+//     if (!token) return <Navigate to="/login" />;
+//     const authCheck = await checkAuth(token);
+//     if (!authCheck.success) return <Navigate to="/login" />;
+//     const {setUser} = useAuth();
+//     setUser(authCheck.data.user);
+//   }
+//   if (role && user.role !== role) return <Navigate to="/login" />;
+//   return children;
+// };
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(true);
@@ -37,17 +44,15 @@ const App = () => {
           <Route
             path="/"
             element={
-              <ProtectedRoute>
                 <StudentDashboard />
-              </ProtectedRoute>
             }
           />
           <Route
             path="/instructor"
             element={
-              <ProtectedRoute role="instructor">
+              // <ProtectedRoute role="instructor">
                 <InstructorDashboard />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
 
@@ -68,9 +73,9 @@ const App = () => {
           <Route
             path="/my-courses"
             element={
-              <ProtectedRoute role="student">
+              // <ProtectedRoute role="student">
                 <MyCourses />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route

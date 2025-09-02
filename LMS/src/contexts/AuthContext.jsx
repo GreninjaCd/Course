@@ -1,43 +1,53 @@
-// src/contexts/AuthContext.js
-import React, { createContext, useContext, useState, useEffect } from "react";
+// src/api.js
 
-const AuthContext = createContext();
+import { useNavigate } from "react-router-dom";
 
-export const useAuth = () => useContext(AuthContext);
+const API_BASE = 'http://localhost:5000';
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) setUser(storedUser);
-  }, []);
-
-  const signup = (name, email, password, role) => {
-    const newUser = { name, email, password, role };
-    localStorage.setItem("user", JSON.stringify(newUser));
-    setUser(newUser);
-    return { success: true };
-  };
-
-  const login = (email, password) => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser?.email === email && storedUser?.password === password) {
-      setUser(storedUser);
-      return { success: true };
-    }
-    return { success: false, message: "Invalid credentials" };
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, signup, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+// ---- AUTH API CALLS ----
+export const registerUser = async ({ userName, email, password, role }) => {
+  try {
+    console.log(email, password, role);
+    const response = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName, email, password, role }),
+    });
+    return await response.json();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
+
+export const loginUser = async ({ email, password }) => {
+  try {
+    console.log(email, password);
+    const response = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userEmail: email, password }),
+    });
+    return await response.json();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const checkAuth = async (token) => {
+  try {
+    const response = await fetch(`${API_BASE}/auth/check-auth`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const logout = () => {
+  localStorage.clear();
+window.location.reload();
+}

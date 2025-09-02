@@ -4,9 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const registerUser = async(req,res)=>{
-    const {userName, userEmail, password, role} =  req.body;
-
-    const existingUser = await User.findOne({userEmail});
+    const {userName, email, password, role} =  req.body;
+    //console.log(req.body);
+    const existingUser = await User.findOne({email});
     if(existingUser){
         return res.status(400).json({
             success: false,
@@ -23,7 +23,7 @@ const registerUser = async(req,res)=>{
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
         userName,
-        userEmail,
+        userEmail: email,
         password: hashedPassword,
         role
     });
@@ -36,6 +36,7 @@ const registerUser = async(req,res)=>{
 
 const loginUser = async(req,res)=>{
     const {userEmail, password} = req.body;
+    //console.log(req.body);
     const checkUser = await User.findOne({userEmail});
     if(!checkUser || !(await bcrypt.compare(password, checkUser.password))){
         return res.status(401).json({
@@ -43,7 +44,6 @@ const loginUser = async(req,res)=>{
             message: 'Invalid credentials'
         });
     }
-
     const accessToken = jwt.sign({
         _id: checkUser._id,
         userName: checkUser.userName,

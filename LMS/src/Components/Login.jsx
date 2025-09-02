@@ -1,16 +1,30 @@
 // src/components/Login.jsx
 import React, { useState } from 'react';
 import { GraduationCap } from 'lucide-react';
-import { useAuth } from "../contexts/AuthContext";
-
+import {loginUser as login} from "../contexts/AuthContext";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/useAuth';
 
 const Login = ({ onToggle }) => {
-  const { login, isLoading } = useAuth();
-  const [formData, setFormData] = useState({ userEmail: '', password: '' });
-
+  const [formData, setFormData] = useState({ email: '', password: '' }); // Changed from userEmail to email
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const {setUser} = useAuth();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(formData.userEmail, formData.password);
+    setError('');
+    const result = await login(formData);
+    console.log(result);
+    localStorage.setItem('token', result.data.accessToken);
+    if (result.success) {
+      setUser(result.data.user)
+      console.log('Login successful:');
+      navigate('/');
+      // window.location.href = '/';
+    } else {
+      setError(result.message || 'Login failed. Please try again.');
+    }
   };
 
   return (
@@ -22,6 +36,9 @@ const Login = ({ onToggle }) => {
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
         </div>
+
+        {error && <p className="text-red-600 text-center">{error}</p>}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -33,8 +50,9 @@ const Login = ({ onToggle }) => {
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter your email"
-                value={formData.userEmail}
-                onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -48,6 +66,7 @@ const Login = ({ onToggle }) => {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -63,7 +82,7 @@ const Login = ({ onToggle }) => {
           <div className="text-center">
             <span className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <button onClick={onToggle} className="font-medium text-blue-600 hover:text-blue-500">
+              <button onClick={onToggle} className="font-medium text-blue-600 hover:text-blue-500" type="button">
                 Sign up
               </button>
             </span>

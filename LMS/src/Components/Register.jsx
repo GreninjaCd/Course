@@ -1,16 +1,15 @@
 // src/components/Register.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from "../contexts/AuthContext";
+import { registerUser as signup } from "../contexts/AuthContext";
 
 const Register = ({ onToggle }) => {
-  const { signup, user } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     userName: '',
-    userEmail: '',
+    email: '',
     password: '',
     confirmPassword: '',
     role: 'student',
@@ -21,15 +20,18 @@ const Register = ({ onToggle }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
-    }
-  }, [user, navigate]);
+  // ✅ Generic input handler
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long.");
@@ -40,18 +42,13 @@ const Register = ({ onToggle }) => {
       setError("Passwords do not match.");
       return;
     }
-
+console.log(formData);
     setIsLoading(true);
-    const result = await signup(
-      formData.userName,
-      formData.userEmail,
-      formData.password,
-      formData.role
-    );
+    const result = await signup(formData);
     setIsLoading(false);
 
     if (result.success) {
-      navigate("/dashboard");
+      navigate("/");
     } else {
       setError(result.message || "Signup failed");
     }
@@ -70,7 +67,7 @@ const Register = ({ onToggle }) => {
             {/* Full Name */}
             <div>
               <label htmlFor="userName" className="block text-sm font-medium text-gray-700">
-                Full Name
+                Username
               </label>
               <input
                 id="userName"
@@ -80,24 +77,26 @@ const Register = ({ onToggle }) => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter your full name"
                 value={formData.userName}
-                onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                onChange={handleChange}
+                disabled={isLoading}
               />
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="userEmail" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
               <input
-                id="userEmail"
-                name="userEmail"
+                id="email"
+                name="email"
                 type="email"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Enter your email"
-                value={formData.userEmail}
-                onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
+                value={formData.email}
+                onChange={handleChange}
+                disabled={isLoading}
               />
             </div>
 
@@ -116,12 +115,14 @@ const Register = ({ onToggle }) => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Create a password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={handleChange}
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-gray-500"
+                  tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -143,12 +144,14 @@ const Register = ({ onToggle }) => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Re-enter password"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  onChange={handleChange}
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-3 text-gray-500"
+                  tabIndex={-1}
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -165,7 +168,8 @@ const Register = ({ onToggle }) => {
                 name="role"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={handleChange}
+                disabled={isLoading}
               >
                 <option value="student">Student</option>
                 <option value="instructor">Instructor</option>

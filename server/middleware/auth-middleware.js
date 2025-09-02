@@ -14,8 +14,9 @@ const authenticate = (req, res, next) => {
         });
     } 
     const token = authHeader.split(' ')[1];
-
+    console.log("Token received:", token);
     const payload = verifyToken(token,"JWT_SECRET");
+    console.log("Decoded payload:", payload);
     req.user = payload;
 
     next();
